@@ -9,9 +9,18 @@
   --line: #26325a;
   --text: #f2f5ff;
   --muted: #b3bddb;
-  --accent: #ffc857;
+  /* heritage palette: Greek side = deep Aegean blue + white, Dutch side = orange.
+     --nl (0..1) is set live by the 3D scene: 0 while Greece is shown, 1 once the Netherlands is. */
+  --aegean: #1a4fc4;
+  --aegean-hi: #8fb8ff;
+  --orange: #ff7a1a;
+  --accent: var(--orange);          /* calls to action, active states */
   --accent-ink: #050816;
-  --accent-2: #8fb8ff;
+  --accent-2: var(--aegean-hi);
+  --nl: 1;
+  --hl: color-mix(in srgb, var(--aegean-hi) calc((1 - var(--nl)) * 100%), var(--orange)); /* highlight that follows the heritage state */
+  --rule: rgba(242, 245, 255, 0.78);
+  --panel: #080d24;
   --focus: #ffffff;
   --grid-line: rgba(160, 190, 255, 0.05);
   --noise-opacity: 0.06;
@@ -84,6 +93,8 @@ a { color: inherit; }
 }
 .skip:focus { top: var(--s-1); }
 
+@supports not (color: color-mix(in srgb, red 50%, blue)) { :root { --hl: var(--orange); } }
+
 /* glass panels: readable on their own even without backdrop-filter */
 .glass {
   background: var(--glass-solid); border: 1px solid var(--glass-line); border-radius: var(--radius);
@@ -100,7 +111,7 @@ a { color: inherit; }
   font-family: var(--font-mono);
 }
 .loader-in { display: flex; align-items: baseline; gap: 1.2rem; font-weight: 700; }
-.loader-mark { font-size: var(--fs-lg); color: var(--accent); }
+.loader-mark { font-size: var(--fs-lg); color: var(--hl); }
 .loader-count { font-size: clamp(3.5rem, 14vw, 9rem); font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
 .loader-count b { font-weight: 700; display: inline-block; min-width: 3ch; text-align: right; }
 .loader-bar { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 2rem; height: 2px; background: var(--line); }
@@ -114,7 +125,7 @@ a { color: inherit; }
   gap: var(--s-1) var(--s-3); min-height: 4.5rem;
 }
 .brand { font-family: var(--font-mono); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-lg); }
-.brand span { color: var(--accent); }
+.brand span { color: var(--hl); }
 nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--s-2); }
 nav a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; text-decoration: none; font-weight: 600; font-size: var(--fs-sm); color: var(--muted); transition: color var(--t); }
 nav a:hover { color: var(--text); }
@@ -126,18 +137,18 @@ nav a:hover { color: var(--text); }
   display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em;
   text-transform: uppercase; color: var(--muted); text-shadow: 0 0 6px var(--bg);
 }
-.hud b { color: var(--accent); font-weight: 700; }
+.hud b { color: var(--hl); font-weight: 700; }
 
 /* hero */
 .hero { padding: var(--s-5) 0 var(--s-5); position: relative; min-height: min(46rem, 88vh); }
-.eyebrow { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--accent-2); letter-spacing: 0.04em; margin: 0 0 var(--s-2); }
+.eyebrow { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--hl); letter-spacing: 0.04em; margin: 0 0 var(--s-2); }
 .hero h1 { font-size: var(--fs-display); line-height: var(--lh-display); letter-spacing: -0.045em; font-weight: 900; margin: 0 0 var(--s-4); }
 .name-line { display: block; }
 .name-line.indent { padding-left: clamp(0rem, 6vw, 6rem); }
-.name-line em { font-style: normal; color: var(--accent); display: inline-block; transform: rotate(var(--tilt)); transform-origin: 0 100%; }
+.name-line em { font-style: normal; color: var(--hl); display: inline-block; transform: rotate(var(--tilt)); transform-origin: 0 100%; }
 .hero-meta { max-width: 33rem; padding: var(--s-3); }
 .role { font-size: var(--fs-lg); margin: 0 0 0.35rem; font-weight: 700; }
-.hero-line { margin: 0 0 var(--s-2); font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--accent); }
+.hero-line { margin: 0 0 var(--s-2); font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--hl); }
 .avail { color: var(--muted); margin: 0 0 var(--s-3); }
 .actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
 .btn {
@@ -153,7 +164,7 @@ nav a:hover { color: var(--text); }
 /* sections */
 section { padding: var(--s-5) 0; }
 .sh { margin: 0 0 var(--s-4); position: relative; line-height: 1; }
-.sh .num { display: block; font-size: var(--fs-num); font-weight: 900; line-height: 0.75; letter-spacing: -0.06em; color: transparent; -webkit-text-stroke: 2px var(--accent); margin-bottom: -0.2em; user-select: none; }
+.sh .num { display: block; font-size: var(--fs-num); font-weight: 900; line-height: 0.75; letter-spacing: -0.06em; color: transparent; -webkit-text-stroke: 2px var(--hl); margin-bottom: -0.2em; user-select: none; }
 .sh .clip { display: block; overflow: hidden; padding: 0.05em 0 0.14em; position: relative; }
 .sh .title { display: block; font-size: var(--fs-title); font-weight: 900; letter-spacing: -0.04em; line-height: 1.05; }
 h3 { font-size: var(--fs-lg); margin: 0 0 var(--s-1); letter-spacing: -0.01em; }
@@ -164,11 +175,13 @@ h3 { font-size: var(--fs-lg); margin: 0 0 var(--s-1); letter-spacing: -0.01em; }
 
 /* about / heritage */
 .heritage { padding: var(--s-3); max-width: 30rem; margin-bottom: var(--s-4); }
-.label { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--accent-2); letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 var(--s-1); }
+.label { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--hl); letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 var(--s-1); }
 .her-big { font-size: clamp(1.4rem, 3.2vw, 2rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; margin: 0 0 var(--s-2); }
 .chips { list-style: none; padding: 0; margin: 0; display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .chips li { font-family: var(--font-mono); font-size: var(--fs-xs); padding: 0.35rem 0.9rem; border: var(--border) solid var(--glass-line); border-radius: 999px; color: var(--muted); transition: background var(--t), color var(--t), border-color var(--t); }
-.chips li.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+.chips li.on { color: var(--accent-ink); font-weight: 700; }
+.chips li[data-k="gr"].on { background: var(--aegean-hi); border-color: var(--aegean-hi); }
+.chips li[data-k="nl"].on { background: var(--orange); border-color: var(--orange); }
 .about-body { padding: var(--s-3); max-width: 44rem; }
 .about-text { margin: 0 0 var(--s-2); font-size: var(--fs-lg); }
 .tools { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.6rem; }
@@ -178,11 +191,11 @@ h3 { font-size: var(--fs-lg); margin: 0 0 var(--s-1); letter-spacing: -0.01em; }
 
 /* projects */
 .project { display: grid; gap: var(--s-4); padding: var(--s-3); margin-bottom: var(--s-5); }
-.project.featured { border-color: rgba(255, 200, 87, 0.55); }
 .project p { margin: 0 0 var(--s-2); color: var(--muted); }
 .project ul.points { margin: 0 0 var(--s-2); padding-left: 1.2rem; color: var(--text); }
 .project ul.points li { margin-bottom: 0.25rem; }
-.project.single { grid-template-columns: 1fr; }
+.project.single { grid-template-columns: minmax(0, 1fr); }
+.project.featured { grid-template-columns: minmax(0, 1fr); }
 .link-out { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; color: var(--accent); }
 .stage { position: relative; margin-bottom: 9%; perspective: 1200px; }
 .device { margin: 0; border: var(--border) solid var(--glass-line); background: var(--bg); overflow: hidden; box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5); }
@@ -210,6 +223,41 @@ h3 { font-size: var(--fs-lg); margin: 0 0 var(--s-1); letter-spacing: -0.01em; }
 .contact-title { font-size: var(--fs-contact); line-height: 1; letter-spacing: -0.05em; font-weight: 900; margin: 0 0 var(--s-3); }
 .site-footer small { display: block; margin-top: var(--s-4); color: var(--muted); font-size: var(--fs-xs); }
 
+/* Greek motif: a thin meander (Greek key) line, drawn by GSAP on scroll */
+.meander {
+  height: 10px; width: min(100% - 2 * var(--gutter), var(--max)); margin: 0 auto; background: var(--hl);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 10'%3E%3Cpath d='M0 9.2H2V.8h16v8.4H8V4.6h5M18 9.2h2' fill='none' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E") repeat-x left center / 20px 10px;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 10'%3E%3Cpath d='M0 9.2H2V.8h16v8.4H8V4.6h5M18 9.2h2' fill='none' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E") repeat-x left center / 20px 10px;
+}
+.loader-bar { height: 10px; background: var(--line); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 10'%3E%3Cpath d='M0 9.2H2V.8h16v8.4H8V4.6h5M18 9.2h2' fill='none' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E") repeat-x left center / 20px 10px; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 10'%3E%3Cpath d='M0 9.2H2V.8h16v8.4H8V4.6h5M18 9.2h2' fill='none' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E") repeat-x left center / 20px 10px; }
+.loader-bar i { background: var(--orange); }
+
+/* Dutch motif: De Stijl structure. Straight 2px rules, asymmetric rectangles, a few solid colour blocks. */
+.ds { display: grid; gap: 2px; background: var(--rule); border: 2px solid var(--rule); grid-template-columns: 1fr; }
+.ds > * { background: var(--panel); border: 0; border-radius: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; margin: 0; min-width: 0; }
+.ds > .ds-block { min-height: 1.75rem; }
+.ds > .ds-orange { background: var(--orange); }
+.ds > .ds-blue { background: var(--aegean); }
+.ds-projects { margin-bottom: var(--s-5); }
+.ds .project { margin-bottom: 0; }
+.ds .card:hover { transform: none; border: 0; background: #0d1535; }
+@media (min-width: 48rem) {
+  .grid.ds-msc { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px; }
+  .ds-msc > :nth-child(1) { grid-column: 1 / 6; }
+  .ds-msc > :nth-child(2) { grid-column: 6 / 13; }
+  .ds-msc > :nth-child(3) { grid-column: 1 / 5; }
+  .ds-msc > :nth-child(4) { grid-column: 5 / 7; }
+  .ds-msc > :nth-child(5) { grid-column: 7 / 13; }
+  .ds-msc .card:nth-child(even) { margin-top: 0; }
+}
+@media (min-width: 64rem) {
+  .ds-projects { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: 5rem auto 3.5rem; }
+  .ds-projects > .featured { grid-column: 1 / 9; grid-row: 1 / 4; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .ds-projects > .ds-orange { grid-column: 9 / 13; grid-row: 1 / 2; }
+  .ds-projects > .single { grid-column: 9 / 13; grid-row: 2 / 3; }
+  .ds-projects > .ds-blue { grid-column: 9 / 13; grid-row: 3 / 4; }
+}
+
 /* Intro elements stay hidden only while JS is about to animate them.
    Never under reduced motion; the failsafe in the page head removes .js if the scripts never run. */
 @media (prefers-reduced-motion: no-preference) {
@@ -224,8 +272,6 @@ h3 { font-size: var(--fs-lg); margin: 0 0 var(--s-1); letter-spacing: -0.01em; }
   .hud { left: var(--gutter); right: var(--gutter); }
 }
 @media (min-width: 64rem) {
-  .project.featured { grid-template-columns: 4fr 8fr; align-items: center; }
-  .project.featured .stage { margin-right: -1.5rem; }
   .hero { padding: var(--s-6) 0 var(--s-5); }
 }
 @media (max-width: 47.99rem) {

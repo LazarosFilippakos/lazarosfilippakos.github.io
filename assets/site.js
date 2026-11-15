@@ -155,6 +155,10 @@
       scrollTrigger: { trigger: ".tools", start: "top 92%" }
     });
 
+    // meander lines draw themselves from left to right (clip-path only)
+    gsap.utils.toArray(".meander").forEach(function (m) {
+      gsap.fromTo(m, { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1.6, ease: "power2.inOut", scrollTrigger: { trigger: m, start: "top 94%" }, onComplete: function () { gsap.set(m, { clearProps: "clipPath" }); } });
+    });
     var feat = document.querySelector(".project.featured");
     if (feat) {
       gsap.from(feat, { y: 90, opacity: 0, duration: 1, ease: "expo.out", scrollTrigger: { trigger: feat, start: "top 90%" } });

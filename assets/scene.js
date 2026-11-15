@@ -180,7 +180,7 @@ export function createScene(canvas, opts) {
     vertexShader: VERT, fragmentShader: FRAG,
     uniforms: {
       uP: { value: 0 }, uTime: { value: 0 }, uSize: { value: isMobile ? 1.5 : 1.35 }, uPix: { value: dpr },
-      uCool: { value: new THREE.Color(0x8fb8ff) }, uHot: { value: new THREE.Color(0xffc857) },
+      uCool: { value: new THREE.Color(0x8fb8ff) }, uHot: { value: new THREE.Color(0xffffff) },
       uAlpha: { value: 1 },
     },
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
@@ -189,6 +189,10 @@ export function createScene(canvas, opts) {
   points.frustumCulled = false;
   scene.add(points);
 
+  // heritage colour shift: Greek side = Aegean blue + white, Dutch side = orange
+  const C = { gCool: new THREE.Color(0x8fb8ff), gHot: new THREE.Color(0xffffff), nCool: new THREE.Color(0xffa05a), nHot: new THREE.Color(0xff6a00) };
+  const rootStyle = document.documentElement.style;
+  let lastNl = -1;
   // state driven from outside
   const state = { p: 0, pt: 0, scroll: 0, mx: 0, my: 0, shiftX: 0, shiftY: 0 };
   let running = false, raf = 0, last = performance.now(), time = 0;
@@ -237,6 +241,12 @@ export function createScene(canvas, opts) {
     points.rotation.x += ((state.my * -0.08) - points.rotation.x) * 0.05;
     camera.position.z = 62 - 5 * Math.sin(Math.min(state.p, 4) * Math.PI / 2) * 0.6 - starMix * 14;
     mat.uniforms.uAlpha.value = isMobile && state.p < 0.6 ? 0.45 : 1;
+    // 0 while the hero/Greece is shown, ramps to 1 across the Greece -> Netherlands morph, eases back a little in the starfield
+    let nl = Math.min(Math.max(state.p - 1, 0), 1);
+    if (state.p > 3) nl = 1 - 0.55 * Math.min(state.p - 3, 1);
+    mat.uniforms.uCool.value.copy(C.gCool).lerp(C.nCool, nl);
+    mat.uniforms.uHot.value.copy(C.gHot).lerp(C.nHot, nl);
+    if (Math.abs(nl - lastNl) > 0.004) { lastNl = nl; rootStyle.setProperty("--nl", nl.toFixed(3)); } // drives the CSS highlight colour
     renderer.render(scene, camera);
   }
 
