@@ -209,12 +209,14 @@ export function createScene(canvas, opts) {
   // desired layout per stage: shapes sit on the right on wide screens, high on phones
   function layout(p) {
     const wide = camera.aspect > 1.1;
-    const shifts = wide ? [[11, 0], [11, 0], [11, 0], [3, 0], [0, 0]] : [[0, 10], [0, 12], [0, 12], [0, 10], [0, 0]];
+    // hero "LF" is smaller and pushed to the far right edge so it stays clear of the name
+    const heroX = 25.7 * camera.aspect - 12.5;
+    const shifts = wide ? [[heroX, 0], [11, 0], [11, 0], [3, 0], [0, 0]] : [[0, 10], [0, 12], [0, 12], [0, 10], [0, 0]];
+    const scales = wide ? [0.75, 1, 1, 1, 1] : [0.72, 0.72, 0.72, 0.72, 0.72];
     const i = Math.min(Math.floor(p), 3), f = p - i;
     const a = shifts[i], b = shifts[i + 1];
     state.shiftX = a[0] + (b[0] - a[0]) * f; state.shiftY = a[1] + (b[1] - a[1]) * f;
-    const sc = wide ? 1 : 0.72;
-    points.scale.setScalar(sc);
+    points.scale.setScalar(scales[i] + (scales[i + 1] - scales[i]) * f);
   }
 
   function frame(now) {
@@ -240,7 +242,7 @@ export function createScene(canvas, opts) {
     points.rotation.y += ((sway + state.mx * 0.12) - points.rotation.y) * 0.05 + starMix * dt * 0.06;
     points.rotation.x += ((state.my * -0.08) - points.rotation.x) * 0.05;
     camera.position.z = 62 - 5 * Math.sin(Math.min(state.p, 4) * Math.PI / 2) * 0.6 - starMix * 14;
-    mat.uniforms.uAlpha.value = isMobile && state.p < 0.6 ? 0.45 : 1;
+    mat.uniforms.uAlpha.value = isMobile && state.p < 0.6 ? 0.45 : (state.p < 1 ? 0.75 + 0.25 * state.p : 1);
     // 0 while the hero/Greece is shown, ramps to 1 across the Greece -> Netherlands morph, eases back a little in the starfield
     let nl = Math.min(Math.max(state.p - 1, 0), 1);
     if (state.p > 3) nl = 1 - 0.55 * Math.min(state.p - 3, 1);

@@ -34,7 +34,7 @@
   --fs-lg: 1.25rem;
   --fs-title: clamp(2.3rem, 7.5vw, 5.5rem);
   --fs-num: clamp(5.5rem, 22vw, 16rem);
-  --fs-display: clamp(2.9rem, 12vw, 10.5rem);
+  --fs-display: clamp(2.9rem, min(12vw, 16vh), 10.5rem); /* vh cap keeps the intro card on the first screen */
   --fs-contact: clamp(2.6rem, 10vw, 7.5rem);
   --lh-body: 1.6;
   --lh-display: 1.04;
@@ -272,7 +272,10 @@ h3 { font-size: var(--fs-lg); margin: 0 0 var(--s-1); letter-spacing: -0.01em; }
   .hud { left: var(--gutter); right: var(--gutter); }
 }
 @media (min-width: 64rem) {
-  .hero { padding: var(--s-6) 0 var(--s-5); }
+  .hero { padding: var(--s-4) 0 var(--s-5); min-height: 0; }
+  .hero h1 { margin-bottom: var(--s-3); }
+  .hero-meta { max-width: 38rem; padding: 1.25rem 2rem; }
+  .hero-meta .avail { margin-bottom: var(--s-2); }
 }
 @media (max-width: 47.99rem) {
   .hero-meta { margin-top: var(--s-2); }
