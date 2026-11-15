@@ -193,7 +193,7 @@ function layerPoints(count, box, size, alpha, dpr, THREEref) {
     vertexShader: VERT_LAYER, fragmentShader: FRAG, transparent: true, depthWrite: false, blending: THREEref.AdditiveBlending,
     uniforms: {
       uTime: { value: 0 }, uSize: { value: size }, uPix: { value: dpr }, uSpin: { value: 0 }, uScatter: { value: 0 },
-      uCool: { value: new THREEref.Color(0x8fb8ff) }, uHot: { value: new THREEref.Color(0xffffff) }, uAlpha: { value: alpha },
+      uCool: { value: new THREEref.Color(0xf3e6d3) }, uHot: { value: new THREEref.Color(0xfff6ea) }, uAlpha: { value: alpha },
     },
   });
   const pts = new THREEref.Points(geo, mat); pts.frustumCulled = false;
@@ -229,7 +229,7 @@ export function createScene(canvas, opts) {
     vertexShader: VERT, fragmentShader: FRAG,
     uniforms: {
       uP: { value: 0 }, uTime: { value: 0 }, uSize: { value: isMobile ? 1.5 : 1.35 }, uPix: { value: dpr },
-      uCool: { value: new THREE.Color(0x8fb8ff) }, uHot: { value: new THREE.Color(0xffffff) },
+      uCool: { value: new THREE.Color(0xd98055) }, uHot: { value: new THREE.Color(0xfff1de) },
       uAlpha: { value: 1 },
       uMouse: { value: new THREE.Vector2(9, 9) }, uMouseStr: { value: 0 }, uAspect: { value: 1.6 }, uScatter: { value: 0 },
     },
@@ -243,8 +243,8 @@ export function createScene(canvas, opts) {
   const near = layerPoints(isMobile ? 24 : 70, [46, 28, 8, 40], 5.5, 0.16, dpr, THREE);
   scene.add(far); scene.add(near);
 
-  // heritage colour shift: Greek side = Aegean blue + white, Dutch side = orange
-  const C = { gCool: new THREE.Color(0x8fb8ff), gHot: new THREE.Color(0xffffff), nCool: new THREE.Color(0xffa05a), nHot: new THREE.Color(0xff6a00) };
+  // heritage colour shift: Greek side = terracotta + cream, Dutch side = bright orange
+  const C = { gCool: new THREE.Color(0xd98055), gHot: new THREE.Color(0xfff1de), nCool: new THREE.Color(0xff7a14), nHot: new THREE.Color(0xffd9a8) };
   const rootStyle = document.documentElement.style;
   let lastNl = -1;
   // state driven from outside
@@ -311,7 +311,7 @@ export function createScene(canvas, opts) {
     mat.uniforms.uScatter.value = state.scatter;
     far.material.uniforms.uTime.value = time; far.material.uniforms.uSpin.value = time * 0.012 + state.p * 0.15; far.material.uniforms.uScatter.value = state.scatter;
     near.material.uniforms.uTime.value = time; near.material.uniforms.uSpin.value = time * 0.02; near.material.uniforms.uScatter.value = state.scatter;
-    far.material.uniforms.uCool.value.copy(mat.uniforms.uCool.value); near.material.uniforms.uCool.value.copy(mat.uniforms.uCool.value); near.material.uniforms.uHot.value.copy(mat.uniforms.uHot.value);
+
     camera.position.z = 62 - 5 * Math.sin(Math.min(state.p, 4) * Math.PI / 2) * 0.6 - starMix * 14;
     mat.uniforms.uAlpha.value = isMobile && state.p < 0.6 ? 0.45 : (state.p < 1 ? 0.75 + 0.25 * state.p : 1);
     // 0 while the hero/Greece is shown, ramps to 1 across the Greece -> Netherlands morph, eases back a little in the starfield
