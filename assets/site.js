@@ -63,7 +63,7 @@
         return new Promise(function (r) { setTimeout(r, 30); }); // let the counter paint before the heavy build
       }).then(function () {
         scene = mod.createScene(canvas, {
-          count: isMobile ? 5000 : 20000, maxDpr: 1.5, isMobile: isMobile,
+          count: isMobile ? 4000 : 17000, maxDpr: 1.5, isMobile: isMobile,
           fontFamily: "Inter, 'Segoe UI', sans-serif"
         });
         root.classList.add("has-scene");
@@ -95,6 +95,10 @@
     pointer();
     magnets();
     anchors();
+    showcase();
+    cursor();
+    scrambles();
+    langSwitch();
     ScrollTrigger.refresh();
   }
 
@@ -135,7 +139,7 @@
     // 2 -> 3 laptop + phone + grid behind the projects
     ScrollTrigger.create({ trigger: "#projects", start: "top 90%", end: "top 35%", onUpdate: set(2), onRefresh: set(2) });
     // 3 -> 4 disperse into a starfield for the contact section
-    ScrollTrigger.create({ trigger: "#contact", start: "top 95%", end: "top 40%", onUpdate: set(3), onRefresh: set(3) });
+    ScrollTrigger.create({ trigger: ".closing", start: "top 85%", end: "bottom 60%", onUpdate: set(3), onRefresh: set(3) });
     ScrollTrigger.create({ start: 0, end: "max", onUpdate: function (self) { S.scroll = self.progress; } });
   }
 
@@ -159,24 +163,8 @@
     gsap.utils.toArray(".meander").forEach(function (m) {
       gsap.fromTo(m, { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1.6, ease: "power2.inOut", scrollTrigger: { trigger: m, start: "top 94%" }, onComplete: function () { gsap.set(m, { clearProps: "clipPath" }); } });
     });
-    var feat = document.querySelector(".project.featured");
-    if (feat) {
-      gsap.from(feat, { y: 90, opacity: 0, duration: 1, ease: "expo.out", scrollTrigger: { trigger: feat, start: "top 90%" } });
-      gsap.from(feat.querySelectorAll(".eyebrow, h3, p, .points li, .tags li"), { y: 28, opacity: 0, duration: 0.8, stagger: 0.05, ease: "power3.out", scrollTrigger: { trigger: feat, start: "top 80%" } });
-      var st = { trigger: feat.querySelector(".stage"), start: "top 95%", end: "center 55%", scrub: 0.8 };
-      gsap.fromTo(".device-desktop", { rotation: -9, scale: 0.9, y: 70 }, { rotation: 0, scale: 1, y: 0, ease: "none", scrollTrigger: st });
-      gsap.fromTo(".device-phone", { rotation: 16, scale: 0.85, y: 140 }, { rotation: 0, scale: 1, y: 0, ease: "none", scrollTrigger: st });
-      gsap.to(".device-phone", { yPercent: -12, ease: "none", scrollTrigger: { trigger: feat.querySelector(".stage"), start: "center 55%", end: "bottom top", scrub: true } });
-    }
-    var swim = document.querySelector(".project.single");
-    if (swim) gsap.from(swim, { y: 80, opacity: 0, rotation: -1.5, duration: 1, ease: "expo.out", scrollTrigger: { trigger: swim, start: "top 90%" } });
-
-    gsap.from(".grid .card", {
-      y: 90, opacity: 0, rotation: function (i) { return i % 2 ? 4 : -4; }, duration: 1, stagger: 0.14, ease: "expo.out",
-      scrollTrigger: { trigger: ".grid", start: "top 88%" },
-      onComplete: function () { gsap.set(".grid .card", { clearProps: "transform" }); } // keep the CSS hover working
-    });
-
+    gsap.from(".cl-ln > span", { yPercent: 115, duration: 1.2, stagger: 0.14, ease: "expo.out", scrollTrigger: { trigger: ".closing-h", start: "top 88%" } });
+    gsap.from(".closing .btn", { y: 40, opacity: 0, duration: 0.9, ease: "expo.out", scrollTrigger: { trigger: ".closing .btn", start: "top 95%" } });
     var ct = document.querySelector(".contact-title");
     if (ct) {
       gsap.from(".contact-panel", { y: 80, opacity: 0, duration: 1, ease: "expo.out", scrollTrigger: { trigger: ".contact-panel", start: "top 92%" } });
@@ -190,10 +178,13 @@
 
   /* ---------- HUD: scroll % and scrambled section label ---------- */
   function hud() {
-    var pct = document.getElementById("hud-pct"), sec = document.getElementById("hud-sec");
+    var pct = document.getElementById("hud-pct"), sec = document.getElementById("hud-sec"), progI = document.querySelector(".progress i");
     ScrollTrigger.create({
       start: 0, end: "max",
-      onUpdate: function (self) { pct.textContent = String(Math.round(self.progress * 100)).padStart(3, "0"); }
+      onUpdate: function (self) {
+        pct.textContent = String(Math.round(self.progress * 100)).padStart(3, "0");
+        if (progI) progI.style.transform = "scaleY(" + self.progress + ")";
+      }
     });
     var glyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/<>_";
     var cur = sec.textContent;
@@ -221,6 +212,7 @@
     window.addEventListener("pointermove", function (e) {
       scene.state.mx = (e.clientX / window.innerWidth - 0.5) * 2;
       scene.state.my = (e.clientY / window.innerHeight - 0.5) * 2;
+      scene.state.pointer = true; scene.state.lastMove = performance.now();
     }, { passive: true });
   }
   function magnets() {
@@ -242,6 +234,151 @@
         if (!t) return;
         e.preventDefault(); lenis.scrollTo(t, { offset: -10 });
         if (t.setAttribute) { if (!t.hasAttribute("tabindex")) t.setAttribute("tabindex", "-1"); t.focus({ preventScroll: true }); }
+      });
+    });
+  }
+
+  /* ---------- Projects showcase: pinned, one project at a time (desktop); plain list on phones ---------- */
+  function showcase() {
+    var sc = document.querySelector(".showcase");
+    if (!sc) return;
+    var slides = gsap.utils.toArray(".slide", sc), n = slides.length;
+    var cur = document.getElementById("sc-cur"), barI = sc.querySelector(".sc-bar i");
+    var mm = gsap.matchMedia();
+    mm.add({ pin: "(min-width: 1024px) and (hover: hover) and (pointer: fine)", list: "(max-width: 1023.98px), (hover: none), (pointer: coarse)" }, function (ctx) {
+      if (!ctx.conditions.pin) {
+        slides.forEach(function (s) {
+          gsap.from(s, { y: 70, opacity: 0, duration: 1, ease: "expo.out", scrollTrigger: { trigger: s, start: "top 90%" } });
+        });
+        return;
+      }
+      sc.classList.add("is-pinned");
+      gsap.set(slides, { autoAlpha: 0 }); gsap.set(slides[0], { autoAlpha: 1 });
+      var idx = -1;
+      function setActive(i) {
+        if (i === idx) return; idx = i;
+        slides.forEach(function (s, k) {
+          if (k === i) { s.removeAttribute("inert"); s.setAttribute("aria-hidden", "false"); } else { s.setAttribute("inert", ""); s.setAttribute("aria-hidden", "true"); }
+        });
+        cur.textContent = String(i + 1).padStart(2, "0");
+      }
+      setActive(0);
+      var tl = gsap.timeline({ defaults: { ease: "power2.inOut" } });
+      for (var i = 1; i < n; i++) {
+        tl.addLabel("s" + i);
+        tl.to(slides[i - 1], { autoAlpha: 0, x: -90, duration: 0.5 }, "s" + i);
+        tl.fromTo(slides[i], { autoAlpha: 0, x: 90 }, { autoAlpha: 1, x: 0, duration: 0.5 }, "s" + i + "+=0.25");
+        tl.to({}, { duration: 0.5 });
+      }
+      var D = tl.duration();
+      var rest = []; for (var k = 0; k < n; k++) rest.push(k === 0 ? 0 : (1.25 * (k - 1) + 1.0) / D);
+      var st = ScrollTrigger.create({
+        trigger: sc, start: "top top", end: function () { return "+=" + Math.round(window.innerHeight * (n - 1) * 0.85); },
+        pin: true, scrub: 0.6, animation: tl, anticipatePin: 1,
+        onUpdate: function (self) {
+          setActive(Math.min(n - 1, Math.round(self.progress * D / 1.25)));
+          barI.style.transform = "scaleX(" + self.progress + ")";
+        }
+      });
+      function goTo(i) {
+        i = Math.max(0, Math.min(n - 1, i));
+        var y = st.start + rest[i] * (st.end - st.start);
+        if (lenis) lenis.scrollTo(y); else window.scrollTo({ top: y });
+      }
+      // settle on the nearest project once scrolling rests (own snap: ScrollTrigger snap fights Lenis)
+      var snapT = 0, onLenis = null;
+      if (lenis) {
+        onLenis = function () {
+          clearTimeout(snapT);
+          snapT = setTimeout(function () {
+            var pr = st.progress; if (pr <= 0.001 || pr >= 0.999) return;
+            var best = 0; rest.forEach(function (r, q) { if (Math.abs(r - pr) < Math.abs(rest[best] - pr)) best = q; });
+            if (Math.abs(rest[best] - pr) > 0.006) lenis.scrollTo(st.start + rest[best] * (st.end - st.start), { duration: 0.6 });
+          }, 160);
+        };
+        lenis.on("scroll", onLenis);
+      }
+      var prev = sc.querySelector(".sc-prev"), next = sc.querySelector(".sc-next");
+      function onPrev() { goTo(idx - 1); } function onNext() { goTo(idx + 1); }
+      prev.addEventListener("click", onPrev); next.addEventListener("click", onNext);
+
+      // pointer tilt: the device frame leans toward the cursor in 3D
+      var cleanups = [];
+      slides.forEach(function (s) {
+        var vis = s.querySelector(".slide-visual"), stage = s.querySelector(".stage");
+        if (!vis || !stage) return;
+        gsap.set(stage, { transformPerspective: 1000 });
+        var qy = gsap.quickTo(stage, "rotationY", { duration: 0.6, ease: "power3" }), qx = gsap.quickTo(stage, "rotationX", { duration: 0.6, ease: "power3" });
+        function mv(e) { var r = vis.getBoundingClientRect(); qy(((e.clientX - r.left) / r.width - 0.5) * 16); qx(-((e.clientY - r.top) / r.height - 0.5) * 12); }
+        function lv() { qy(0); qx(0); }
+        vis.addEventListener("pointermove", mv); vis.addEventListener("pointerleave", lv);
+        cleanups.push(function () { vis.removeEventListener("pointermove", mv); vis.removeEventListener("pointerleave", lv); });
+      });
+      return function () {
+        sc.classList.remove("is-pinned");
+        if (lenis && onLenis) lenis.off("scroll", onLenis); clearTimeout(snapT);
+        prev.removeEventListener("click", onPrev); next.removeEventListener("click", onNext);
+        cleanups.forEach(function (f) { f(); });
+        slides.forEach(function (s) { s.removeAttribute("inert"); s.removeAttribute("aria-hidden"); });
+        gsap.set(slides, { clearProps: "all" });
+        gsap.set(sc.querySelectorAll(".stage"), { clearProps: "all" });
+      };
+    });
+  }
+
+  /* ---------- custom cursor (mouse only) ---------- */
+  function cursor() {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    var c = document.querySelector(".cursor"); if (!c) return;
+    var lab = c.querySelector(".cursor-label");
+    root.classList.add("has-cursor");
+    gsap.set(c, { x: -100, y: -100 });
+    var qx = gsap.quickTo(c, "x", { duration: 0.18, ease: "power3" }), qy = gsap.quickTo(c, "y", { duration: 0.18, ease: "power3" });
+    window.addEventListener("pointermove", function (e) { qx(e.clientX); qy(e.clientY); }, { passive: true });
+    document.addEventListener("pointerover", function (e) {
+      var t = e.target; if (!t.closest) return;
+      var link = t.closest("a, button"), vis = t.closest(".slide-visual");
+      if (link) { c.classList.add("is-link"); c.classList.remove("is-label"); }
+      else if (vis) { lab.textContent = vis.parentNode.getAttribute("data-cursor") || ""; c.classList.add("is-label"); c.classList.remove("is-link"); }
+      else { c.classList.remove("is-link", "is-label"); }
+    });
+  }
+
+  /* ---------- decode (scramble) effect for mono labels ---------- */
+  function scrambles() {
+    var glyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>/_";
+    var keepRe = /[\s.,\/\-:;!?()]/;
+    function run(el, delay) {
+      var to = el.textContent, o = { t: 0 };
+      gsap.to(o, {
+        t: 1, duration: 0.9, delay: delay || 0, ease: "none",
+        onUpdate: function () {
+          var keep = Math.floor(o.t * to.length), s = "";
+          for (var i = 0; i < to.length; i++) s += i < keep || keepRe.test(to[i]) ? to[i] : glyphs[(Math.random() * glyphs.length) | 0];
+          el.textContent = s;
+        },
+        onComplete: function () { el.textContent = to; }
+      });
+    }
+    gsap.utils.toArray(".hero .eyebrow, .hero-line").forEach(function (el, i) { run(el, 0.9 + i * 0.25); });
+    gsap.utils.toArray(".label").forEach(function (el) {
+      ScrollTrigger.create({ trigger: el, start: "top 92%", once: true, onEnter: function () { run(el, 0); } });
+    });
+  }
+
+  /* ---------- language switch: particle scatter + wipe, then navigate ---------- */
+  function langSwitch() {
+    gsap.set(".wipe", { x: 0, xPercent: -101 });
+    window.addEventListener("pageshow", function (e) { if (e.persisted) { gsap.set(".wipe", { x: 0, xPercent: -101 }); if (scene) scene.state.scatter = 0; } });
+    document.querySelectorAll(".lang a:not([aria-current])").forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        e.preventDefault();
+        var href = a.href, gone = false;
+        function go() { if (!gone) { gone = true; location.href = href; } }
+        if (scene) gsap.to(scene.state, { scatter: 1, duration: 0.6, ease: "power2.in" });
+        gsap.to(".wipe", { xPercent: 0, duration: 0.65, ease: "expo.inOut", onComplete: go });
+        setTimeout(go, 1400);
       });
     });
   }

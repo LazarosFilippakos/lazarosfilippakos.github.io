@@ -258,6 +258,75 @@ h3 { font-size: var(--fs-lg); margin: 0 0 var(--s-1); letter-spacing: -0.01em; }
   .ds-projects > .ds-blue { grid-column: 9 / 13; grid-row: 3 / 4; }
 }
 
+/* ---------- v4: showcase (Projects), closing statement, cursor, wipe, progress ---------- */
+.vignette { position: fixed; inset: 0; z-index: -1; pointer-events: none; display: none; background: radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(3, 5, 14, 0.78) 100%); }
+.has-scene .vignette { display: block; }
+.progress { display: none; }
+.js .progress { display: block; position: fixed; right: 0; top: 0; width: 3px; height: 100vh; z-index: 3; background: rgba(160, 190, 255, 0.12); pointer-events: none; }
+.progress i { display: block; width: 100%; height: 100%; background: var(--hl); transform-origin: 50% 0; transform: scaleY(0); }
+.wipe { position: fixed; inset: 0; z-index: 150; background: var(--orange); transform: translateX(-101%); pointer-events: none; }
+
+/* custom cursor: desktop mouse only, never under reduced motion or on touch */
+.cursor { display: none; }
+.has-cursor, .has-cursor a, .has-cursor button { cursor: none; }
+.has-cursor .cursor {
+  display: grid; place-items: center; position: fixed; left: 0; top: 0; z-index: 200; pointer-events: none;
+  width: 14px; height: 14px; margin: -7px 0 0 -7px; border: 2px solid var(--orange); border-radius: 50%;
+  transition: width 0.2s, height 0.2s, margin 0.2s, background 0.2s;
+}
+.cursor.is-link { width: 56px; height: 56px; margin: -28px 0 0 -28px; background: rgba(255, 122, 26, 0.18); }
+.cursor.is-label { width: 92px; height: 92px; margin: -46px 0 0 -46px; background: var(--orange); }
+.cursor-label { font: 700 0.72rem/1 var(--font-mono); color: var(--accent-ink); text-transform: uppercase; letter-spacing: 0.05em; opacity: 0; transition: opacity 0.15s; }
+.cursor.is-label .cursor-label { opacity: 1; }
+
+.showcase { margin-top: var(--s-2); }
+.sc-head { display: none; }
+.slides { display: grid; gap: 2px; background: var(--rule); border: 2px solid var(--rule); }
+.slide { background: var(--panel); display: grid; gap: var(--s-3); padding: var(--s-3); grid-template-columns: minmax(0, 1fr); min-width: 0; }
+.slide-text > p { color: var(--muted); margin: 0 0 var(--s-2); }
+.slide-text ul.points { margin: 0 0 var(--s-2); padding-left: 1.2rem; }
+.slide-text ul.points li { margin-bottom: 0.25rem; }
+.slide-text h3 { font-size: clamp(1.6rem, 3.4vw, 2.6rem); font-weight: 900; letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 var(--s-1); }
+.slide-num { display: inline-block; font: 900 clamp(1.8rem, 5vw, 3rem)/1 var(--font-mono); padding: 0.35rem 0.8rem; margin-bottom: var(--s-2); color: var(--accent-ink); }
+.slide-num.orange { background: var(--orange); }
+.slide-num.blue { background: var(--aegean); color: #fff; }
+.slide-visual { min-width: 0; align-self: center; }
+.stage.solo { margin-bottom: 0; }
+.device-solo { width: 100%; transform: none; }
+.device-solo .placeholder { border-radius: 0; border: 0; aspect-ratio: 16 / 10; }
+.device-link { display: block; }
+.vis { display: block; width: 100%; height: auto; color: var(--muted); background: var(--panel); }
+.vis .ln { fill: none; stroke: currentColor; stroke-width: 2; }
+.vis .thin { stroke-width: 1.5; opacity: 0.6; }
+.vis .fill { fill: var(--aegean); stroke: none; opacity: 0.85; }
+.vis .dot { fill: var(--aegean-hi); }
+.vis .hot, .vis .hotfill { fill: var(--orange); stroke: none; }
+
+/* pinned showcase (desktop with JS): one project at a time, driven by scroll */
+.showcase.is-pinned { height: 100vh; margin-top: 0; }
+.is-pinned > .wrap { height: 100%; display: flex; flex-direction: column; padding: 1.25rem 0; }
+.is-pinned .sc-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.9rem; }
+.sc-count { margin: 0; font: 700 var(--fs-sm)/1 var(--font-mono); color: var(--muted); white-space: nowrap; }
+.sc-count b { color: var(--hl); font-size: 1.6rem; }
+.sc-bar { flex: 1; height: 2px; background: var(--line); }
+.sc-bar i { display: block; height: 100%; background: var(--hl); transform-origin: 0 50%; transform: scaleX(0); }
+.sc-nav { display: flex; gap: 2px; }
+.sc-nav button { width: 44px; height: 44px; border: 2px solid var(--rule); background: var(--panel); color: var(--text); font: 700 1.1rem/1 var(--font-body); cursor: pointer; }
+.sc-nav button:hover { background: var(--orange); color: var(--accent-ink); border-color: var(--orange); }
+.is-pinned .slides { position: relative; flex: 1; display: block; min-height: 0; }
+.is-pinned .slide { position: absolute; inset: 0; grid-template-columns: 5fr 7fr; align-items: center; gap: var(--s-4); padding: var(--s-4); overflow: hidden; }
+.is-pinned .slide-visual { perspective: 1000px; }
+.is-pinned .stage { transform-style: preserve-3d; will-change: transform; }
+.is-pinned .slide-text > p { margin-bottom: var(--s-1); }
+
+.closing { padding: var(--s-6) 0; }
+.closing-h { font-size: clamp(2.6rem, 9.4vw, 9rem); line-height: 1; letter-spacing: -0.05em; font-weight: 900; margin: 0 0 var(--s-4); }
+.cl-ln { display: block; overflow: hidden; padding-bottom: 0.12em; }
+.cl-ln > span { display: block; }
+.btn-xl { min-height: 64px; padding: 0 1.4rem; font-size: clamp(0.95rem, 2.6vw, 1.6rem); overflow-wrap: anywhere; }
+@media (min-width: 48rem) { .btn-xl { padding: 0 2.2rem; } }
+@media (prefers-reduced-motion: reduce) { .progress, .wipe { display: none !important; } }
+
 /* Intro elements stay hidden only while JS is about to animate them.
    Never under reduced motion; the failsafe in the page head removes .js if the scripts never run. */
 @media (prefers-reduced-motion: no-preference) {

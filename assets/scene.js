@@ -114,6 +114,7 @@ function starTargets(count) {
 const VERT = /* glsl */ `
 attribute vec3 aT1; attribute vec3 aT2; attribute vec3 aT3; attribute vec3 aT4; attribute float aRand;
 uniform float uP; uniform float uTime; uniform float uSize; uniform float uPix;
+uniform vec2 uMouse; uniform float uMouseStr; uniform float uAspect; uniform float uScatter;
 varying float vA; varying float vHot; varying float vRand;
 vec3 stage(float i) {
   if (i < 0.5) return position;
@@ -133,6 +134,16 @@ void main() {
   pos += 0.12 * vec3(sin(uTime * 0.8 + aRand * 90.0), cos(uTime * 0.7 + aRand * 70.0), sin(uTime * 0.6 + aRand * 50.0));
   vec4 mv = modelViewMatrix * vec4(pos, 1.0);
   gl_Position = projectionMatrix * mv;
+  // soft repel + swirl around the pointer (screen space), eases back when uMouseStr falls
+  vec2 ndc = gl_Position.xy / gl_Position.w;
+  vec2 dd = ndc - uMouse; dd.x *= uAspect;
+  float dist = length(dd);
+  float m = uMouseStr * smoothstep(0.30, 0.0, dist);
+  vec2 dir = dist > 0.0001 ? dd / dist : vec2(0.0);
+  vec2 push = (dir * 0.9 + vec2(-dir.y, dir.x) * 0.55) * m * 0.12;
+  gl_Position.xy += vec2(push.x / uAspect, push.y) * gl_Position.w;
+  // language-switch scatter
+  gl_Position.xy += vec2(cos(aRand * 6.2831), sin(aRand * 41.0)) * uScatter * 1.4 * gl_Position.w;
   float depth = -mv.z;
   gl_PointSize = clamp(uSize * uPix * (0.55 + aRand * 0.9) * (60.0 / depth), 1.0, 14.0 * uPix);
   vA = smoothstep(190.0, 25.0, depth);        // depth fog
@@ -150,6 +161,44 @@ void main() {
   vec3 col = mix(uCool, uHot, clamp(vHot, 0.0, 1.0));
   gl_FragColor = vec4(col, a * vA * uAlpha * (0.55 + vRand * 0.45));
 }`;
+
+const VERT_LAYER = /* glsl */ `
+attribute float aRand;
+uniform float uTime; uniform float uSize; uniform float uPix; uniform float uSpin; uniform float uScatter;
+varying float vA; varying float vHot; varying float vRand;
+void main() {
+  vec3 p = position;
+  float c = cos(uSpin), s = sin(uSpin);
+  p.xz = mat2(c, -s, s, c) * p.xz;
+  p.y += sin(uTime * 0.15 + aRand * 30.0) * 0.9;
+  p.x += cos(uTime * 0.11 + aRand * 20.0) * 0.9;
+  vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * mv;
+  gl_Position.xy += vec2(cos(aRand * 6.2831), sin(aRand * 41.0)) * uScatter * 1.4 * gl_Position.w;
+  gl_PointSize = clamp(uSize * uPix * (60.0 / -mv.z) * (0.6 + aRand), 1.0, 46.0 * uPix);
+  vA = smoothstep(2.0, 40.0, -mv.z); // near points fade as they pass the camera
+  vHot = step(0.93, aRand);
+  vRand = aRand;
+}`;
+
+function layerPoints(count, box, size, alpha, dpr, THREEref) {
+  const geo = new THREEref.BufferGeometry();
+  const pos = new Float32Array(count * 3), r = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    pos[i * 3] = rand(-box[0], box[0]); pos[i * 3 + 1] = rand(-box[1], box[1]); pos[i * 3 + 2] = rand(box[2], box[3]); r[i] = Math.random();
+  }
+  geo.setAttribute("position", new THREEref.BufferAttribute(pos, 3));
+  geo.setAttribute("aRand", new THREEref.BufferAttribute(r, 1));
+  const mat = new THREEref.ShaderMaterial({
+    vertexShader: VERT_LAYER, fragmentShader: FRAG, transparent: true, depthWrite: false, blending: THREEref.AdditiveBlending,
+    uniforms: {
+      uTime: { value: 0 }, uSize: { value: size }, uPix: { value: dpr }, uSpin: { value: 0 }, uScatter: { value: 0 },
+      uCool: { value: new THREEref.Color(0x8fb8ff) }, uHot: { value: new THREEref.Color(0xffffff) }, uAlpha: { value: alpha },
+    },
+  });
+  const pts = new THREEref.Points(geo, mat); pts.frustumCulled = false;
+  return pts;
+}
 
 /* ---------- scene ---------- */
 
@@ -182,19 +231,25 @@ export function createScene(canvas, opts) {
       uP: { value: 0 }, uTime: { value: 0 }, uSize: { value: isMobile ? 1.5 : 1.35 }, uPix: { value: dpr },
       uCool: { value: new THREE.Color(0x8fb8ff) }, uHot: { value: new THREE.Color(0xffffff) },
       uAlpha: { value: 1 },
+      uMouse: { value: new THREE.Vector2(9, 9) }, uMouseStr: { value: 0 }, uAspect: { value: 1.6 }, uScatter: { value: 0 },
     },
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   });
   const points = new THREE.Points(geo, mat);
   points.frustumCulled = false;
   scene.add(points);
+  // depth layers: a fine far starfield and a few large soft points near the camera
+  const far = layerPoints(isMobile ? 700 : 2200, [230, 140, -280, -60], 0.55, 0.55, dpr, THREE);
+  const near = layerPoints(isMobile ? 24 : 70, [46, 28, 8, 40], 5.5, 0.16, dpr, THREE);
+  scene.add(far); scene.add(near);
 
   // heritage colour shift: Greek side = Aegean blue + white, Dutch side = orange
   const C = { gCool: new THREE.Color(0x8fb8ff), gHot: new THREE.Color(0xffffff), nCool: new THREE.Color(0xffa05a), nHot: new THREE.Color(0xff6a00) };
   const rootStyle = document.documentElement.style;
   let lastNl = -1;
   // state driven from outside
-  const state = { p: 0, pt: 0, scroll: 0, mx: 0, my: 0, shiftX: 0, shiftY: 0 };
+  const state = { p: 0, pt: 0, scroll: 0, mx: 0, my: 0, shiftX: 0, shiftY: 0, scatter: 0, lastMove: -1e9, pointer: false };
+  const mNdc = new THREE.Vector2(9, 9); let mStr = 0;
   let running = false, raf = 0, last = performance.now(), time = 0;
   let frames = 0, acc = 0, adapted = false;
 
@@ -227,7 +282,7 @@ export function createScene(canvas, opts) {
       frames++; acc += dt;
       if (frames === 90) {
         adapted = true;
-        if (frames / acc < 40) { geo.setDrawRange(0, Math.floor(count * 0.6)); renderer.setPixelRatio(1); mat.uniforms.uPix.value = 1; renderer.setSize(window.innerWidth, window.innerHeight, false); }
+        if (frames / acc < 40) { geo.setDrawRange(0, Math.floor(count * 0.6)); renderer.setPixelRatio(1); mat.uniforms.uPix.value = 1; far.material.uniforms.uPix.value = 1; near.material.uniforms.uPix.value = 1; renderer.setSize(window.innerWidth, window.innerHeight, false); }
       }
     }
     state.p += (state.pt - state.p) * Math.min(1, dt * 4.5); // ease toward the scroll target
@@ -239,8 +294,24 @@ export function createScene(canvas, opts) {
     const starMix = Math.max(0, state.p - 3); // slow spin in the starfield
     points.position.x += (state.shiftX - points.position.x) * 0.1;
     points.position.y += (state.shiftY - points.position.y) * 0.1;
-    points.rotation.y += ((sway + state.mx * 0.12) - points.rotation.y) * 0.05 + starMix * dt * 0.06;
-    points.rotation.x += ((state.my * -0.08) - points.rotation.x) * 0.05;
+    // idle drift keeps the scene alive even with no input (the only motion on touch devices)
+    const idleY = Math.sin(time * 0.13) * 0.07, idleX = Math.sin(time * 0.09 + 1.0) * 0.035;
+    points.rotation.y += ((sway + state.mx * 0.1 + idleY) - points.rotation.y) * 0.05 + starMix * dt * 0.06;
+    points.rotation.x += ((state.my * -0.06 + idleX) - points.rotation.x) * 0.05;
+    points.position.y += Math.sin(time * 0.21) * 0.01;
+    // camera parallax follows the mouse
+    camera.position.x += (state.mx * 3.2 - camera.position.x) * 0.04;
+    camera.position.y += (-state.my * 2.0 - camera.position.y) * 0.04;
+    camera.lookAt(0, 0, 0);
+    // pointer force: only for fine pointers, fades out after the mouse rests
+    const active = state.pointer && now - state.lastMove < 1800;
+    mStr += ((active ? 1 : 0) - mStr) * Math.min(1, dt * 3);
+    mNdc.x += (state.mx - mNdc.x) * Math.min(1, dt * 10); mNdc.y += (-state.my - mNdc.y) * Math.min(1, dt * 10);
+    mat.uniforms.uMouse.value.copy(mNdc); mat.uniforms.uMouseStr.value = mStr; mat.uniforms.uAspect.value = camera.aspect;
+    mat.uniforms.uScatter.value = state.scatter;
+    far.material.uniforms.uTime.value = time; far.material.uniforms.uSpin.value = time * 0.012 + state.p * 0.15; far.material.uniforms.uScatter.value = state.scatter;
+    near.material.uniforms.uTime.value = time; near.material.uniforms.uSpin.value = time * 0.02; near.material.uniforms.uScatter.value = state.scatter;
+    far.material.uniforms.uCool.value.copy(mat.uniforms.uCool.value); near.material.uniforms.uCool.value.copy(mat.uniforms.uCool.value); near.material.uniforms.uHot.value.copy(mat.uniforms.uHot.value);
     camera.position.z = 62 - 5 * Math.sin(Math.min(state.p, 4) * Math.PI / 2) * 0.6 - starMix * 14;
     mat.uniforms.uAlpha.value = isMobile && state.p < 0.6 ? 0.45 : (state.p < 1 ? 0.75 + 0.25 * state.p : 1);
     // 0 while the hero/Greece is shown, ramps to 1 across the Greece -> Netherlands morph, eases back a little in the starfield
@@ -259,7 +330,7 @@ export function createScene(canvas, opts) {
 
   return {
     state, start, stop, resize,
-    dispose() { stop(); geo.dispose(); mat.dispose(); renderer.dispose(); },
+    dispose() { stop(); geo.dispose(); mat.dispose(); far.geometry.dispose(); far.material.dispose(); near.geometry.dispose(); near.material.dispose(); renderer.dispose(); },
   };
 }
 
