@@ -8,6 +8,7 @@
 <link rel="canonical" href="https://lazarosfilippakos.github.io/">
 <link rel="alternate" hreflang="en" href="https://lazarosfilippakos.github.io/">
 <link rel="alternate" hreflang="el" href="https://lazarosfilippakos.github.io/el/">
+<link rel="alternate" hreflang="nl" href="https://lazarosfilippakos.github.io/nl/">
 <link rel="alternate" hreflang="x-default" href="https://lazarosfilippakos.github.io/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Lazaros Filippakos · Full-stack & UI developer">
@@ -16,7 +17,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://lazarosfilippakos.github.io/assets/img/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0d1117">
+<meta name="theme-color" content="#050816">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,47 +27,65 @@
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/SplitText.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
 <script defer src="assets/site.js"></script>
 </head>
 <body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="loader" aria-hidden="true"><div class="loader-in"><span class="loader-mark">LF_</span><span class="loader-count"><b id="loader-n">0</b>%</span></div><div class="loader-bar"><i></i></div></div>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header" data-intro-header>
  <div class="wrap">
   <a class="brand" href="/" aria-label="Lazaros Filippakos">LF<span>_</span></a>
   <nav aria-label="Main">
    <ul>
-    <li><a href="#projects">Projects</a></li>
     <li><a href="#about">About</a></li>
+    <li><a href="#projects">Projects</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><span class="lang" role="group" aria-label="Language">
-      <a href="./" hreflang="en" lang="en" aria-current="page">EN</a>
-      <a href="el/" hreflang="el" lang="el">ΕΛ</a></span></li>
+    <li><span class="lang" role="group" aria-label="Language"><a href="./" hreflang="en" lang="en" aria-current="page">EN</a><a href="el/" hreflang="el" lang="el">ΕΛ</a><a href="nl/" hreflang="nl" lang="nl">NL</a></span></li>
    </ul>
   </nav>
  </div>
 </header>
+<div class="hud" aria-hidden="true"><span>Scroll <b id="hud-pct">000</b>%</span><span id="hud-sec">00 / LF</span></div>
 <main id="main">
- <section class="hero" aria-labelledby="hero-h">
+ <section class="hero" aria-labelledby="hero-h" data-hud="00 / LF">
   <div class="wrap">
    <p class="eyebrow intro-hide">Portfolio / 2026</p>
    <h1 id="hero-h"><span class="name-line"><span class="name">Lazaros</span></span> <span class="name-line indent"><em class="name">Filippakos</em></span></h1>
-   <div class="hero-meta">
-    <p class="role intro-hide">Full-stack & UI developer</p>
-    <p class="avail intro-hide">Open to small UI and full-stack projects. I build small, useful web apps end to end, from data model to UI.</p>
-    <div class="actions intro-hide">
+   <div class="hero-meta glass intro-hide">
+    <p class="role">Full-stack & UI developer</p>
+    <p class="hero-line">Half Greek, half Dutch, grew up in Greece.</p>
+    <p class="avail">Open to small UI and full-stack projects. I build small, useful web apps end to end, from data model to UI.</p>
+    <div class="actions">
      <a class="btn btn-primary" href="mailto:filippakoslazaros@gmail.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email me</a>
      <a class="btn" href="https://www.linkedin.com/in/lazaros-filippakos-1188061ab/" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>LinkedIn</a>
     </div>
    </div>
-   <div class="badge intro-hide" aria-hidden="true"><span>Open to small projects</span></div>
   </div>
  </section>
- <div class="band" aria-hidden="true"><div class="band-track">Full-stack / UI / TypeScript / React / Next.js / PostgreSQL / Full-stack / UI / TypeScript / React / Next.js / PostgreSQL / Full-stack / UI / TypeScript / React / Next.js / PostgreSQL / </div></div>
 
- <section id="projects" aria-labelledby="projects-h">
+ <section id="about" aria-labelledby="about-h" data-hud="01 / ABOUT">
   <div class="wrap">
-   <h2 id="projects-h" class="sh"><span class="num" aria-hidden="true">01</span><span class="clip"><span class="title">Projects</span></span></h2>
-   <article class="project featured">
+   <h2 id="about-h" class="sh"><span class="num" aria-hidden="true">01</span><span class="clip"><span class="title">About</span></span></h2>
+   <div class="heritage glass">
+    <p class="label">Heritage</p>
+    <p class="her-big">Half Greek, half Dutch. Grew up in Greece.</p>
+    <ul class="chips"><li data-k="gr" class="on">Greece</li><li data-k="nl">The Netherlands</li></ul>
+   </div>
+   <div class="about-body glass">
+    <p class="about-text">MSc in Informatics, University of Piraeus.</p>
+    <p class="about-text">Right now I am building new sites to learn new technologies, and getting better at using AI in real projects.</p>
+    <h3>Tools I use</h3>
+    <ul class="tools"><li>TypeScript</li><li>React</li><li>Next.js</li><li>Node.js</li><li>PostgreSQL</li><li>Python</li><li>C</li><li>C#</li><li>PHP</li></ul>
+   </div>
+  </div>
+ </section>
+
+ <section id="projects" aria-labelledby="projects-h" data-hud="02 / PROJECTS">
+  <div class="wrap">
+   <h2 id="projects-h" class="sh"><span class="num" aria-hidden="true">02</span><span class="clip"><span class="title">Projects</span></span></h2>
+   <article class="project featured glass">
     <div>
      <p class="eyebrow">Featured</p>
      <h3>GarageTab</h3>
@@ -80,7 +99,7 @@
      <figure class="device device-phone"><img src="assets/img/garagetab-phone-en.webp" width="412" height="839" alt="GarageTab home page on a phone" loading="lazy"></figure>
     </div>
    </article>
-   <article class="project single">
+   <article class="project single glass">
     <div>
      <h3>SwimCoach</h3>
      <p>A training-session generator and coach's notebook for swim coaches, with teams, squads and swimmers.</p>
@@ -91,32 +110,24 @@
   </div>
  </section>
 
- <section aria-labelledby="msc-h">
+ <section aria-labelledby="msc-h" data-hud="03 / MSc">
   <div class="wrap">
-   <h2 id="msc-h" class="sh"><span class="num" aria-hidden="true">02</span><span class="clip"><span class="title">From my MSc</span></span></h2>
-   <ul class="grid"><li class="card"><h3>Plant seedling classification</h3><p>A CNN that sorts seedling photos into 12 species, evaluated with k-fold cross-validation (thesis work).</p><ul class="tags"><li>Python</li><li>Keras / TensorFlow</li></ul></li><li class="card"><h3>Movie database</h3><p>A relational PostgreSQL schema with a Python console client.</p><ul class="tags"><li>PostgreSQL</li><li>Python</li></ul></li><li class="card"><h3>Healthcare web shop</h3><p>Registration, cart, payment form, invoices and order history.</p><ul class="tags"><li>PHP</li><li>MySQL</li><li>Bootstrap</li></ul></li><li class="card"><h3>Cinema ordering kiosk</h3><p>Seat picking, snacks and checkout, built for a human-computer interaction course.</p><ul class="tags"><li>C#</li><li>WinForms</li></ul></li></ul>
-  </div>
- </section>
-
- <section id="about" aria-labelledby="about-h">
-  <div class="wrap">
-   <h2 id="about-h" class="sh"><span class="num" aria-hidden="true">03</span><span class="clip"><span class="title">About</span></span></h2>
-   <p class="about-text">MSc in Informatics, University of Piraeus.</p>
-   <p class="about-text">Right now I am building new sites to learn new technologies, and getting better at using AI in real projects.</p>
-   <h3>Tools I use</h3>
-   <ul class="tools"><li>TypeScript</li><li>React</li><li>Next.js</li><li>Node.js</li><li>PostgreSQL</li><li>Python</li><li>C</li><li>C#</li><li>PHP</li></ul>
+   <h2 id="msc-h" class="sh"><span class="num" aria-hidden="true">03</span><span class="clip"><span class="title">From my MSc</span></span></h2>
+   <ul class="grid"><li class="card glass"><h3>Plant seedling classification</h3><p>A CNN that sorts seedling photos into 12 species, evaluated with k-fold cross-validation (thesis work).</p><ul class="tags"><li>Python</li><li>Keras / TensorFlow</li></ul></li><li class="card glass"><h3>Movie database</h3><p>A relational PostgreSQL schema with a Python console client.</p><ul class="tags"><li>PostgreSQL</li><li>Python</li></ul></li><li class="card glass"><h3>Healthcare web shop</h3><p>Registration, cart, payment form, invoices and order history.</p><ul class="tags"><li>PHP</li><li>MySQL</li><li>Bootstrap</li></ul></li><li class="card glass"><h3>Cinema ordering kiosk</h3><p>Seat picking, snacks and checkout, built for a human-computer interaction course.</p><ul class="tags"><li>C#</li><li>WinForms</li></ul></li></ul>
   </div>
  </section>
 </main>
 
-<footer class="site-footer" id="contact">
+<footer class="site-footer" id="contact" data-hud="04 / CONTACT">
  <div class="wrap">
-  <h2 class="contact-title">Let's talk</h2>
-  <p class="avail">Have a small project in mind? Send me a message.</p>
-  <div class="actions">
-   <a class="btn btn-primary" href="mailto:filippakoslazaros@gmail.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email me</a>
-   <a class="btn" href="https://www.linkedin.com/in/lazaros-filippakos-1188061ab/" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>LinkedIn</a>
-   <a class="btn" href="https://github.com/LazarosFilippakos" rel="noopener">GitHub profile</a>
+  <div class="glass contact-panel">
+   <h2 class="contact-title">Let's talk</h2>
+   <p class="avail">Have a small project in mind? Send me a message.</p>
+   <div class="actions">
+    <a class="btn btn-primary" href="mailto:filippakoslazaros@gmail.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email me</a>
+    <a class="btn" href="https://www.linkedin.com/in/lazaros-filippakos-1188061ab/" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>LinkedIn</a>
+    <a class="btn" href="https://github.com/LazarosFilippakos" rel="noopener">GitHub profile</a>
+   </div>
   </div>
   <small>© 2026 Lazaros Filippakos</small>
  </div>
